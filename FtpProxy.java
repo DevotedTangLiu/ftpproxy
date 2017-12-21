@@ -392,7 +392,7 @@ public class FtpProxy extends Thread {
             if (config.debug) pwDebug.println(client2proxy + fromClient);
 
             try {
-                skDataClient = new Socket(skControlClient.getInetAddress(), port);
+                skDataClient = new Socket(skControlClient.getInetAddress(), port, skControlClient.getLocalAddress(), 20);
 
                 String toClient = "200 PORT command successful.";
                 psClient.print(toClient + CRLF);
