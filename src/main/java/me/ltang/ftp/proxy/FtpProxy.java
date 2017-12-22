@@ -20,11 +20,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 Find the latest version at http://aggemam.dk/ftpproxy
 */
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
 
 public class FtpProxy extends Thread {
+
+    private static final String ENGINE_PATH = System.getProperty("proxy.base", new File(FtpProxy.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent());
+
+    static {
+        System.setProperty("proxy.base", ENGINE_PATH);
+        System.out.println("proxy.base= " + ENGINE_PATH);
+    }
+
     private final static String defaultConfigFile = "ftpproxy.conf";
 
     final static int DEFAULT_BACKLOG = 50;
@@ -51,7 +62,8 @@ public class FtpProxy extends Thread {
     final static Map lastPorts = new HashMap();
 
     // Constants for debug output.
-    final static PrintStream pwDebug = System.out;
+    private static Logger logger = LoggerFactory.getLogger(FtpProxy.class);
+    final static LogUtils pwDebug = new LogUtils(logger);
     final static String server2proxy = "S->P: ";
     final static String proxy2server = "S<-P: ";
     final static String proxy2client = "P->C: ";
@@ -147,11 +159,7 @@ public class FtpProxy extends Thread {
                 new FtpProxy(config, skControlClient).start();
             }
         } catch (IOException e) {
-            if (config.debug) {
-                e.printStackTrace(pwDebug);
-            } else {
-                System.err.println(e.toString());
-            }
+            pwDebug.error(e);
         }
     }
 
@@ -312,7 +320,7 @@ public class FtpProxy extends Thread {
             String toClient = config.msgInternalError;
             if (config.debug) {
                 pwDebug.println(proxy2client + toClient + e.toString());
-                e.printStackTrace(pwDebug);
+                pwDebug.error(e);
             }
             psClient.print(toClient + CRLF);
             psClient.flush();
@@ -443,7 +451,7 @@ public class FtpProxy extends Thread {
             osServer.print(fromClient + CRLF);
             osServer.flush();
             if (config.debug) {
-                pwDebug.print(client2server);
+                pwDebug.println(client2server);
                 if (cmd.startsWith("PASS")) {
                     pwDebug.println("PASS *******");
                 } else {
@@ -704,7 +712,9 @@ public class FtpProxy extends Thread {
             } catch (SocketException e) {
                 // Socket closed.
             } catch (IOException e) {
-                if (config.debug) e.printStackTrace(pwDebug);
+                if (config.debug) {
+                    pwDebug.error(e);
+                }
             }
             close();
         }
