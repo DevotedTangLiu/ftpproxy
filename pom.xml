@@ -30,7 +30,22 @@
 
     <build>
         <finalName>ftp-proxy</finalName>
-
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/shell</directory>
+                <includes>
+                    <include>start.sh</include>
+                    <include>stop.sh</include>
+                </includes>
+                <targetPath>${project.build.directory}/${build.name}/</targetPath>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>*</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -42,6 +57,29 @@
                     <verbose>true</verbose>
                     <encoding>UTF-8</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>jar-with-dependencies</descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <addClassPath>true</addClassPath>
+                            <classpathPrefix></classpathPrefix>
+                            <mainClass>me.ltang.ftp.proxy.FtpProxy</mainClass>
+                        </manifest>
+                    </archive>
+                    <outputDirectory>${project.build.directory}/${build.name}/</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
