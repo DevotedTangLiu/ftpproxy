@@ -1,3 +1,4 @@
+package me.ltang.ftp.proxy;
 /*
 Java FTP Proxy Server 1.3.0
 Copyright (C) 1998-2014 Christian Schmidt
@@ -19,8 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 Find the latest version at http://aggemam.dk/ftpproxy
 */
 
-import java.net.*;
 import java.io.*;
+import java.net.*;
 import java.util.*;
 
 public class FtpProxy extends Thread {
@@ -57,7 +58,6 @@ public class FtpProxy extends Thread {
     final static String client2proxy = "P<-C: ";
     final static String server2client = "S->C: ";
     final static String client2server = "S<-C: ";
-
 
 
     // Use CRLF instead of println() to ensure that CRLF is used
@@ -102,7 +102,7 @@ public class FtpProxy extends Thread {
 
         Properties properties = new Properties();
         try {
-            properties.load(new FileInputStream(configFile));
+            properties.load(FtpProxy.class.getClassLoader().getResourceAsStream(configFile));
         } catch (IOException e) {
             System.err.println("Configuration file error: " + e.getMessage());
             System.exit(0);
@@ -161,8 +161,8 @@ public class FtpProxy extends Thread {
             psClient = new PrintStream(skControlClient.getOutputStream());
 
             if ((config.allowFrom != null &&
-                 !isInSubnetList(config.allowFrom, skControlClient.getInetAddress())) ||
-                isInSubnetList(config.denyFrom, skControlClient.getInetAddress())) {
+                    !isInSubnetList(config.allowFrom, skControlClient.getInetAddress())) ||
+                    isInSubnetList(config.denyFrom, skControlClient.getInetAddress())) {
 
                 String toClient = config.msgOriginAccessDenied;
                 psClient.print(toClient + CRLF);
@@ -176,7 +176,7 @@ public class FtpProxy extends Thread {
                     sLocalClientIP = skControlClient.getLocalAddress().getHostAddress().replace('.', ',');
                 } else {
                     sLocalClientIP = InetAddress.getByName(config.masqueradeHostname.trim()).
-                        getHostAddress().replace('.', ',');
+                            getHostAddress().replace('.', ',');
                 }
             } catch (UnknownHostException e) {
                 String toClient = config.msgMasqHostDNSError;
@@ -250,8 +250,8 @@ public class FtpProxy extends Thread {
             InetAddress serverAddress = InetAddress.getByName(hostname);
 
             if ((config.allowTo != null &&
-                 !isInSubnetList(config.allowTo, serverAddress)) ||
-                isInSubnetList(config.denyTo, serverAddress)) {
+                    !isInSubnetList(config.allowTo, serverAddress)) ||
+                    isInSubnetList(config.denyTo, serverAddress)) {
 
                 String toClient = config.msgDestinationAccessDenied;
 
@@ -261,7 +261,7 @@ public class FtpProxy extends Thread {
             }
 
             serverPassive = config.useActive != null && !isInSubnetList(config.useActive, serverAddress) ||
-                            isInSubnetList(config.usePassive, serverAddress);
+                    isInSubnetList(config.usePassive, serverAddress);
 
             if (config.debug) pwDebug.println("Connecting to " + hostname + " on port " + serverport);
 
@@ -277,7 +277,7 @@ public class FtpProxy extends Thread {
 
             brServer = new BufferedReader(new InputStreamReader(skControlServer.getInputStream()));
             osServer = new PrintStream(skControlServer.getOutputStream(), true);
-            sLocalServerIP = skControlServer.getLocalAddress().getHostAddress().replace('.' ,',');
+            sLocalServerIP = skControlServer.getLocalAddress().getHostAddress().replace('.', ',');
 
             if (!config.onlyAuto) {
                 String fromServer = readResponseFromServer(false);
@@ -296,7 +296,7 @@ public class FtpProxy extends Thread {
 
             readResponseFromServer(true);
 
-            for (;;) {
+            for (; ; ) {
                 String s = brClient.readLine();
                 if (s == null) {
                     break;
@@ -319,13 +319,25 @@ public class FtpProxy extends Thread {
 
         } finally {
             if (ssDataClient != null && !config.clientOneBindPort) {
-                try {ssDataClient.close();} catch (IOException ioe) {}
+                try {
+                    ssDataClient.close();
+                } catch (IOException ioe) {
+                }
             }
             if (ssDataServer != null && !config.serverOneBindPort) {
-                try {ssDataServer.close();} catch (IOException ioe) {}
+                try {
+                    ssDataServer.close();
+                } catch (IOException ioe) {
+                }
             }
-            if (skDataClient != null) try {skDataClient.close();} catch (IOException ioe) {}
-            if (skDataServer != null) try {skDataServer.close();} catch (IOException ioe) {}
+            if (skDataClient != null) try {
+                skDataClient.close();
+            } catch (IOException ioe) {
+            }
+            if (skDataServer != null) try {
+                skDataServer.close();
+            } catch (IOException ioe) {
+            }
             if (psClient != null) psClient.close();
             if (osServer != null) osServer.close();
             if (dcData != null) dcData.close();
@@ -346,9 +358,15 @@ public class FtpProxy extends Thread {
             if (config.debug) pwDebug.println(client2proxy + fromClient);
 
             if (ssDataClient != null && !config.clientOneBindPort) {
-                try { ssDataClient.close(); } catch (IOException ioe) {}
+                try {
+                    ssDataClient.close();
+                } catch (IOException ioe) {
+                }
             }
-            if (skDataClient != null) try { skDataClient.close(); } catch (IOException ioe) {}
+            if (skDataClient != null) try {
+                skDataClient.close();
+            } catch (IOException ioe) {
+            }
             if (dcData != null) dcData.close();
 
             if (ssDataClient == null || !config.clientOneBindPort) {
@@ -360,10 +378,10 @@ public class FtpProxy extends Thread {
 
                 String toClient;
                 if (cmd.startsWith("EPSV")) {
-                  toClient = "229 Entering Extended Passive Mode (|||" + port + "|)";
+                    toClient = "229 Entering Extended Passive Mode (|||" + port + "|)";
                 } else {
-                  toClient = "227 Entering Passive Mode (" + sLocalClientIP + "," +
-                        (int) (port / 256) + "," + (port % 256) + ")";
+                    toClient = "227 Entering Passive Mode (" + sLocalClientIP + "," +
+                            (int) (port / 256) + "," + (port % 256) + ")";
                 }
                 psClient.print(toClient + CRLF);
                 psClient.flush();
@@ -382,17 +400,27 @@ public class FtpProxy extends Thread {
             int port = parsePort(fromClient);
 
             if (ssDataClient != null && !config.clientOneBindPort) {
-                try {ssDataClient.close();} catch (IOException ioe) {}
+                try {
+                    ssDataClient.close();
+                } catch (IOException ioe) {
+                }
                 ssDataClient = null;
             }
-            if (skDataClient != null) try {skDataClient.close();} catch (IOException ioe) {}
+            if (skDataClient != null) try {
+                skDataClient.close();
+            } catch (IOException ioe) {
+            }
             if (dcData != null) dcData.close();
 
 
             if (config.debug) pwDebug.println(client2proxy + fromClient);
 
             try {
-                skDataClient = new Socket(skControlClient.getInetAddress(), port, skControlClient.getLocalAddress(), 20);
+                if (config.bindDataPort < 0) {
+                    skDataClient = new Socket(skControlClient.getInetAddress(), port);
+                } else {
+                    skDataClient = new Socket(skControlClient.getInetAddress(), port, skControlClient.getLocalAddress(), config.bindDataPort);
+                }
 
                 String toClient = "200 PORT command successful.";
                 psClient.print(toClient + CRLF);
@@ -470,7 +498,10 @@ public class FtpProxy extends Thread {
 
     private void setupServerConnection(Object s) throws IOException {
         if (skDataServer != null) {
-            try {skDataServer.close();} catch (IOException ioe) {}
+            try {
+                skDataServer.close();
+            } catch (IOException ioe) {
+            }
         }
 
         if (serverPassive) {
@@ -490,7 +521,10 @@ public class FtpProxy extends Thread {
             (dcData = new DataConnect(s, skDataServer)).start();
         } else {
             if (ssDataServer != null && !config.serverOneBindPort) {
-                try {ssDataServer.close();} catch (IOException ioe) {}
+                try {
+                    ssDataServer.close();
+                } catch (IOException ioe) {
+                }
             }
 
             if (ssDataServer == null || !config.serverOneBindPort) {
@@ -559,7 +593,7 @@ public class FtpProxy extends Thread {
             Integer lastPort = (Integer) lastPorts.get(portRanges);
             if (lastPort != null) {
                 port = lastPort.intValue();
-                for (i = 0; i < portRanges.length && port > portRanges[i + 1]; i += 2);
+                for (i = 0; i < portRanges.length && port > portRanges[i + 1]; i += 2) ;
                 port++;
             } else {
                 port = portRanges[0];
@@ -576,7 +610,7 @@ public class FtpProxy extends Thread {
                     ss = new ServerSocket(port, 1, ia);
                     lastPorts.put(portRanges, new Integer(port));
                     break;
-                } catch(BindException e) {
+                } catch (BindException e) {
                     // Port already in use.
                 }
             }
@@ -596,8 +630,8 @@ public class FtpProxy extends Thread {
         private Object mutex = new Object();
 
         // Each argument may be either a Socket or a ServerSocket.
-        public DataConnect (Object o1, Object o2) {
-            this.o = new Object[] {o1, o2};
+        public DataConnect(Object o1, Object o2) {
+            this.o = new Object[]{o1, o2};
         }
 
         public void run() {
@@ -615,7 +649,7 @@ public class FtpProxy extends Thread {
                             ServerSocket ss = (ServerSocket) o[i];
                             sockets[i] = ss.accept();
                             if (ss == ssDataServer && !config.serverOneBindPort ||
-                                ss == ssDataClient && !config.clientOneBindPort) {
+                                    ss == ssDataClient && !config.clientOneBindPort) {
 
                                 ss.close();
                             }
@@ -625,7 +659,7 @@ public class FtpProxy extends Thread {
                         // Check to see if DataConnection is from same IP address
                         // as the ControlConnection.
                         if (skControlClient.getInetAddress().getHostAddress().
-                            compareTo(sockets[i].getInetAddress().getHostAddress()) == 0) {
+                                compareTo(sockets[i].getInetAddress().getHostAddress()) == 0) {
 
                             validDataConnection = true;
                         }
@@ -642,7 +676,7 @@ public class FtpProxy extends Thread {
                     // In some cases thread socket[0] -> socket[1] thread can
                     // finish before socket[1] -> socket[0] has a chance to start,
                     // so synchronize on a semaphore
-                    synchronized(mutex) {
+                    synchronized (mutex) {
                         new Thread(this).start();
                         try {
                             mutex.wait();
@@ -656,11 +690,11 @@ public class FtpProxy extends Thread {
                 bis = new BufferedInputStream(sockets[n].getInputStream());
                 bos = new BufferedOutputStream(sockets[1 - n].getOutputStream());
 
-                synchronized(mutex) {
-                   mutex.notify();
+                synchronized (mutex) {
+                    mutex.notify();
                 }
 
-                for (;;) {
+                for (; ; ) {
                     for (int i; (i = bis.read(buffer, 0, DATABUFFERSIZE)) != -1; ) {
                         bos.write(buffer, 0, i);
                     }
@@ -676,8 +710,14 @@ public class FtpProxy extends Thread {
         }
 
         public void close() {
-            try { sockets[0].close(); } catch (Exception e) {}
-            try { sockets[1].close(); } catch (Exception e) {}
+            try {
+                sockets[0].close();
+            } catch (Exception e) {
+            }
+            try {
+                sockets[1].close();
+            } catch (Exception e) {
+            }
         }
     }
 }
