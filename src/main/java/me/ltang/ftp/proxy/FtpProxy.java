@@ -427,7 +427,11 @@ public class FtpProxy extends Thread {
                 if (config.bindDataPort < 0) {
                     skDataClient = new Socket(skControlClient.getInetAddress(), port);
                 } else {
-                    skDataClient = new Socket(skControlClient.getInetAddress(), port, skControlClient.getLocalAddress(), config.bindDataPort);
+                    pwDebug.println("connecting from proxy to client:" + skControlClient.getLocalAddress() + ":" + config.bindDataPort + "-->" + skControlClient.getInetAddress() + ":" + port);
+                    skDataClient = new Socket();
+                    skDataClient.setReuseAddress(true);
+                    skDataClient.bind(new InetSocketAddress(skControlClient.getLocalAddress(), config.bindDataPort));
+                    skDataClient.connect(new InetSocketAddress(skControlClient.getInetAddress(), port));
                 }
 
                 String toClient = "200 PORT command successful.";
