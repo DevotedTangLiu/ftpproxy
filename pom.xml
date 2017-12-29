@@ -26,6 +26,22 @@
             <artifactId>logback-core</artifactId>
             <version>1.1.7</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.mike10004</groupId>
+            <artifactId>fengyouchao-sockslib</artifactId>
+            <version>1.0.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.code.findbugs</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.sfl4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <build>
@@ -66,7 +82,7 @@
                         <manifest>
                             <addClassPath>true</addClassPath>
                             <classpathPrefix></classpathPrefix>
-                            <mainClass>me.ltang.ftp.proxy.FtpProxy</mainClass>
+                            <mainClass>me.ltang.ftp.proxy.Bootstrap</mainClass>
                         </manifest>
                     </archive>
                     <outputDirectory>${project.build.directory}/${build.name}/</outputDirectory>

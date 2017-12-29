@@ -29,13 +29,6 @@ import java.util.*;
 
 public class FtpProxy extends Thread {
 
-    private static final String ENGINE_PATH = System.getProperty("proxy.base", new File(FtpProxy.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent());
-
-    static {
-        System.setProperty("proxy.base", ENGINE_PATH);
-        System.out.println("proxy.base= " + ENGINE_PATH);
-    }
-
     private final static String defaultConfigFile = "ftpproxy.conf";
 
     final static int DEFAULT_BACKLOG = 50;
