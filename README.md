@@ -1,10 +1,6 @@
 Java FTP proxy server
 ========
 
-This program will help you if you are behind a firewall and do not have FTP access to the internet, but you have access to machine that has. It will then work as proxy server and in that way let you connect to FTP servers outside the firewall. It is also possible to do it the other way around, i.e. gain FTP access from the internet to beyond the firewall.
-
-To run the program
-
 1. Build this project
     ```
     mvn clean install
@@ -15,4 +11,26 @@ To run the program
     nohup ./start.sh
     ```
 
-For further documentation and confiration examples, please refer to project homepage on http://aggemam.dk/ftpproxy.
+## 背景
+之前公司某个需求，需要使用FTP传输文件，由于服务器间网络不通，需要使用一台跳板机才能访问，所以我们需要一个FTP代理软件，让我们客户端可以通过它访问外网的FTP服务器。
+
+## 辛酸泪
+最先想到的是nginx，但是作为一个SFTP的代理也许可行，毕竟只需要一个SSH端口，作为一个静态文件服务器也行，但是作为一个FTP代理，需要考虑到控制端口和数据端口，nginx并不能满足FTP代理的需求。
+
+然后调用squid, 看文档表示它是支持FTP协议的。下载了各种版本，参考网上各种配置进行尝试，结果都是error error error ！ 谷歌了各种资料，一个是当时的squid版本有bug，一个是squid并不支持主动模式的FTP代理，而公司的防火墙策略要求所有FTP必须是主动模式，GG。
+
+然后只能各种搜索，google啊翻了个遍，看看别人怎么做FTP代理的，结果都是说建议抛弃主动模式，采用被动模式，没办法了，就跑去github搜。
+
+## 曙光
+在github上搜到了某位外国友人的项目[ftpproxy](https://github.com/c960657/ftpproxy)，看了他的说明和代码，第一感觉是这个还比较靠谱，代码量也少。
+
+于是拉下来试用，结果发现，这东东虽然支持主动模式（可以在配置文件中配置），但是只支持代理到FTP服务端的主动模式，客户端到代理端还是使用的被动模式。没法子了，自己改造吧。
+
+## 终章
+为了满足公司内网络情况要求，对ftpproxy进行了改造。
+1. 改造了socket创建方式，使之支持客户端与代理之间的主动模式
+2. 增加了socket5代理的代码，使之支持SFTP代理
+
+改造之后，经过调试测试，也应用在生产环境差不多两年了，目前来看运行良好，没有发生过故障。
+
+今天突然想起这事，觉得也应该记录和分享一下。
